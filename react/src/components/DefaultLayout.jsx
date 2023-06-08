@@ -85,7 +85,7 @@ export default function DefaultLayout() {
                 ) : null}
             </Box>
 
-            <Container maxW={'90%'} p={'6'}>
+            <Container maxWidth={"100vw"} maxHeight={"100vh"} overflowWrap={"hidden"} p={'6'}>
                 <Outlet />
             </Container>
             {/*<Outlet/>*/}

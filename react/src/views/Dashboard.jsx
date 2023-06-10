@@ -3,7 +3,8 @@ import { AddIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import Chart from 'chart.js/auto';
 import { CategoryScale } from "chart.js";
 import { useRef, useState, useEffect } from "react";
-import Papa from 'papaparse'
+// import Papa from 'papaparse'
+// import * as tf from '@tensorflow/tfjs';
 
 Chart.register(CategoryScale)
 
@@ -15,6 +16,7 @@ export default function Dashboard() {
     const [chartDexterity, setChartDexterity] = useState(null);
     const [chartHealth, setChartHealth] = useState(null);
     const [chartStrength, setChartStrength] = useState(null);
+    const [processedData, setProcessedData] = useState(null);
 
     useEffect(() => {
         if (averages && Object.keys(averages).length > 0) {
@@ -24,20 +26,34 @@ export default function Dashboard() {
         }
     }, [averages]);
 
+    const uploadCSV = async (file) => {
+        try {
+            const formData = new FormData();
+            formData.append('csvFile', file);
+
+            const response = await fetch('http://localhost:3000/upload-csv', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const { data } = await response.json();
+                setCsvData(data);
+                calculateAverages(data);
+                console.log('Uploaded and processed data:', data);
+            } else {
+                console.error('Upload failed:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error occurred while uploading:', error);
+        }
+    };
+
+
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
 
-        Papa.parse(file, {
-            header: true,
-            dynamicTyping: true,
-            complete: (results) => {
-                setCsvData(results.data);
-                calculateAverages(results.data);
-            },
-            error: (error) => {
-                setError(error);
-            }
-        });
+        uploadCSV(file)
     };
 
     const handleButtonClick = () => {
